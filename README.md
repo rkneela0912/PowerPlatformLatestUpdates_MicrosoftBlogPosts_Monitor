@@ -211,7 +211,7 @@ An Adaptive Card is posted to the configured chat or channel via the EPMPoint Wo
 
 **Ranjith Neela**
 Power Platform Architect — EPMPoint
-[ranjith.neela@epmpoint.com](mailto:ranjith.neela@epmpoint.com)
+[iamranjithneela@gmail.com](mailto:iamranjithneela@gmail.com)
 
 ---
 
