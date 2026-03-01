@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Never Miss a Power Platform Update: Building a Daily Blog Digest with Power Automate</title>
+  <style>
+    /* ── Reset & base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      color: #1b1b1b;
+      background: #f8f9fa;
+    }
+
+    /* ── Layout container ── */
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      background: #ffffff;
+      box-shadow: 0 2px 24px rgba(0,0,0,.08);
+    }
+
+    /* ── Hero banner ── */
+    .hero {
+      background: linear-gradient(135deg, #0078d4 0%, #005a9e 100%);
+      padding: 56px 48px 48px;
+      color: #fff;
+    }
+    .hero .category-tag {
+      display: inline-block;
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.35);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: 34px;
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 16px;
+    }
+    .hero .subtitle {
+      font-size: 18px;
+      color: #cce4f7;
+      max-width: 680px;
+    }
+    .hero .meta {
+      margin-top: 28px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 14px;
+      color: #a8d4f5;
+    }
+    .hero .meta .author-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .hero .meta .author-info span { display: block; }
+    .hero .meta .author-name { color: #fff; font-weight: 600; font-size: 15px; }
+
+    /* ── Article body ── */
+    .article-body {
+      padding: 48px 48px 64px;
+    }
+
+    /* ── Typography ── */
+    h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #0078d4;
+      margin: 44px 0 14px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e8f0f9;
+    }
+    h3 {
+      font-size: 19px;
+      font-weight: 600;
+      color: #1b1b1b;
+      margin: 28px 0 10px;
+    }
+    p { margin-bottom: 16px; }
+    ul, ol { margin: 12px 0 16px 24px; }
+    li { margin-bottom: 8px; }
+    a { color: #0078d4; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    strong { font-weight: 600; }
+
+    /* ── Callout boxes ── */
+    .callout {
+      border-radius: 8px;
+      padding: 18px 20px;
+      margin: 24px 0;
+      border-left: 4px solid;
+    }
+    .callout.info {
+      background: #f0f6ff;
+      border-color: #0078d4;
+    }
+    .callout.tip {
+      background: #f0fff4;
+      border-color: #107c10;
+    }
+    .callout.note {
+      background: #fff8f0;
+      border-color: #ca5010;
+    }
+    .callout-title {
+      font-weight: 700;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 6px;
+    }
+    .callout.info .callout-title { color: #0078d4; }
+    .callout.tip .callout-title { color: #107c10; }
+    .callout.note .callout-title { color: #ca5010; }
+
+    /* ── Screenshots ── */
+    .screenshot {
+      margin: 16px 0;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #d0e4f7;
+      box-shadow: 0 3px 14px rgba(0,0,0,.09);
+    }
+    .screenshot img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .screenshot figcaption {
+      background: #f4f8fd;
+      border-top: 1px solid #d0e4f7;
+      padding: 9px 16px;
+      font-size: 12px;
+      color: #555;
+      font-style: italic;
+      text-align: center;
+    }
+    .screenshot-series {
+      margin: 28px 0;
+    }
+    .screenshot-series .series-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #0078d4;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    .screenshot-series .screenshot {
+      margin-bottom: 10px;
+    }
+    .screenshot-series .screenshot:last-child {
+      margin-bottom: 0;
+    }
+
+    /* ── Flow steps diagram ── */
+    .flow-steps {
+      margin: 28px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .flow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 14px 0;
+      position: relative;
+    }
+    .flow-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 19px;
+      top: 48px;
+      bottom: -2px;
+      width: 2px;
+      background: #d0e4f7;
+    }
+    .step-badge {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #0078d4;
+      color: #fff;
+      font-weight: 700;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+    }
+    .step-badge.teams { background: #6264a7; }
+    .step-badge.error { background: #ca5010; }
+    .step-content h4 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1b1b1b;
+      margin-bottom: 4px;
+    }
+    .step-content p {
+      font-size: 14px;
+      color: #555;
+      margin: 0;
+    }
+
+    /* ── Tech pills ── */
+    .tech-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 16px 0;
+    }
+    .tech-tag {
+      background: #e8f0f9;
+      color: #0078d4;
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .tech-tag.teams-tag {
+      background: #eeeeff;
+      color: #6264a7;
+    }
+
+    /* ── Feature table ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 14px;
+    }
+    th {
+      background: #0078d4;
+      color: #fff;
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 600;
+    }
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #e8f0f9;
+    }
+    tr:nth-child(even) td { background: #f4f8fd; }
+
+    /* ── Author bio ── */
+    .author-bio {
+      background: #f4f8fd;
+      border: 1px solid #d0e4f7;
+      border-radius: 10px;
+      padding: 28px;
+      margin-top: 56px;
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+    }
+    .author-bio .avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0078d4, #005a9e);
+      color: #fff;
+      font-size: 28px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .author-bio h3 { margin: 0 0 4px; font-size: 18px; color: #0078d4; }
+    .author-bio .role { font-size: 13px; color: #666; margin-bottom: 10px; }
+    .author-bio p { font-size: 14px; margin: 0; }
+
+    /* ── Footer ── */
+    .article-footer {
+      background: #0078d4;
+      color: #cce4f7;
+      text-align: center;
+      padding: 28px 48px;
+      font-size: 13px;
+    }
+    .article-footer a { color: #fff; font-weight: 600; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; }
+      .container { box-shadow: none; }
+    }
+    @media (max-width: 640px) {
+      .hero { padding: 36px 24px 32px; }
+      .hero h1 { font-size: 26px; }
+      .article-body { padding: 32px 24px 48px; }
+      .author-bio { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ═══════════════ HERO ═══════════════ -->
+  <header class="hero">
+    <div class="category-tag">Power Automate &nbsp;·&nbsp; Productivity</div>
+    <h1>Never Miss a Power Platform Update:<br>Building a Daily Blog Digest with Power Automate</h1>
+    <p class="subtitle">
+      How I automated a personalized HTML email digest <em>and</em> Microsoft Teams channel
+      notification for the Power Platform blog — using RSS, Office 365 Outlook, Microsoft Teams,
+      and Power Automate expressions — all in under an hour.
+    </p>
+    <div class="meta">
+      <div class="author-avatar">RN</div>
+      <div class="author-info">
+        <span class="author-name">Ranjith Neela</span>
+        <span>Power Platform Architect &nbsp;·&nbsp; EPMPoint &nbsp;·&nbsp; February 28, 2026</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════ ARTICLE BODY ═══════════════ -->
+  <main class="article-body">
+
+    <!-- ─── Introduction ─── -->
+    <h2>The Problem: Information Overload</h2>
+    <p>
+      If you work in the Microsoft ecosystem — and especially with Power Platform — you already know
+      the challenge: the official
+      <a href="https://www.microsoft.com/en-us/power-platform/blog/" target="_blank">Microsoft Power Platform Blog</a>
+      publishes new content constantly. Release announcements, feature previews, admin tips, community
+      spotlights — keeping up means bookmarking the site, setting browser alerts, or relying on social
+      media feeds that bury the signal in noise.
+    </p>
+    <p>
+      I wanted something cleaner: a <strong>single daily notification</strong> that shows exactly
+      what was published in the last 24 hours, formatted beautifully, with one-click links to each
+      article — delivered to my inbox <em>and</em> to my team's Microsoft Teams channel.
+      And I wanted it to be zero-maintenance — no servers, no code to deploy, no subscriptions.
+    </p>
+    <p>
+      The answer, naturally, was <strong>Power Automate</strong>.
+    </p>
+
+    <div class="callout info">
+      <div class="callout-title">&#128161; What You Will Learn</div>
+      In this post I walk through the design, the flow logic, and the key decisions behind the
+      <em>Power Platform Blog Digest</em> solution — a fully exportable Power Automate cloud flow
+      that monitors the Microsoft Power Platform RSS feed and delivers a polished HTML digest email
+      <strong>and</strong> a Microsoft Teams Adaptive Card notification every morning.
+    </div>
+
+    <!-- ─── What it does ─── -->
+    <h2>What the Flow Does — At a Glance</h2>
+    <p>
+      The flow is simple by design. Every day at <strong>8:00 AM UTC</strong> it wakes up,
+      checks the Power Platform blog's public RSS feed for posts published in the previous 24 hours,
+      and either:
+    </p>
+    <ul>
+      <li><strong>Sends a styled HTML digest email</strong> via Office 365 Outlook <em>and</em>
+          <strong>posts an Adaptive Card to Microsoft Teams</strong> if new posts are found, or</li>
+      <li><strong>Exits gracefully</strong> (status: Succeeded, no notifications sent) if there is nothing new.</li>
+    </ul>
+    <p>
+      A separate <strong>error-handling scope</strong> catches any unexpected failures and fires an
+      alert email to an admin address — so you always know if something went wrong.
+    </p>
+
+    <div class="tech-tags">
+      <span class="tech-tag">Power Automate</span>
+      <span class="tech-tag">RSS Connector</span>
+      <span class="tech-tag">Office 365 Outlook</span>
+      <span class="tech-tag teams-tag">Microsoft Teams</span>
+      <span class="tech-tag">Scheduled Flow</span>
+      <span class="tech-tag">HTML Email</span>
+      <span class="tech-tag">Error Handling</span>
+      <span class="tech-tag">Power Platform Solutions</span>
+    </div>
+
+    <!-- Screenshots 1a–1c — Email digest (3-part series) -->
+    <div class="screenshot-series">
+      <p class="series-title">Sample digest email as received in Microsoft Outlook</p>
+      <figure class="screenshot">
+        <img src="Screenshots/Sample%20digest%20email%20as%20it%20appears%20in%20Outlook%20%E2%80%94%20showing%20the%20branded%20header,%20post%20cards,%20and%20footer%20-%20Chunk1.png"
+             alt="Digest email in Outlook — header and first post card" />
+        <figcaption>The email arrives with subject "New Microsoft Power Platform Blog Posts — [date]" — the branded header and first post card are immediately visible</figcaption>
+      </figure>
+      <figure class="screenshot">
+        <img src="Screenshots/Sample%20digest%20email%20as%20it%20appears%20in%20Outlook%20%E2%80%94%20showing%20the%20branded%20header,%20post%20cards,%20and%20footer%20-%20Chunk2.png"
+             alt="Digest email in Outlook — additional post cards" />
+        <figcaption>Scrolling reveals additional post cards — each with title, publish date, summary, and a "Read More" button linking directly to the article</figcaption>
+      </figure>
+      <figure class="screenshot">
+        <img src="Screenshots/Sample%20digest%20email%20as%20it%20appears%20in%20Outlook%20%E2%80%94%20showing%20the%20branded%20header,%20post%20cards,%20and%20footer%20-%20Chunk3.png"
+             alt="Digest email in Outlook — final post card and footer" />
+        <figcaption>The email closes with the final post card and a subtle footer with a "View Full Blog Archive" link</figcaption>
+      </figure>
+    </div>
+
+    <!-- ─── Flow walkthrough ─── -->
+    <h2>Flow Architecture — Step by Step</h2>
+    <p>
+      The flow has three top-level building blocks: an <em>initialization</em> step, a
+      <em>Main Scope</em> that does all the real work, and an <em>Error Handler Scope</em> that runs
+      only on failure. Here is how each piece fits together.
+    </p>
+
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="step-badge">1</div>
+        <div class="step-content">
+          <h4>Trigger — Recurrence (Daily at 8:00 AM UTC)</h4>
+          <p>A simple recurrence trigger fires once per day. No event, no webhook — just a reliable
+          schedule so the flow is predictable and easy to monitor in run history.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-badge">2</div>
+        <div class="step-content">
+          <h4>Initialize Variables — <code>HTML_Body</code></h4>
+          <p>Empty string variables are declared before the main scope. The primary accumulator
+          (<code>HTML_Body</code>) is filled with styled post cards during the loop and later
+          injected between the email header and footer.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-badge">3</div>
+        <div class="step-content">
+          <h4>List All RSS Feed Items &amp; Filter (last 24 hours)</h4>
+          <p>The built-in RSS connector calls the Power Platform blog feed
+          (<code>https://www.microsoft.com/en-us/power-platform/blog/feed/</code>). A Filter Array
+          action limits results to items published within the last 24 hours using
+          <code>addDays(utcNow(), -1)</code>.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-badge">4</div>
+        <div class="step-content">
+          <h4>Condition — Any New Posts?</h4>
+          <p>A condition checks <code>length(body('List_all_RSS_feed_items')) &gt; 0</code>.
+          If false, a <em>Terminate</em> action marks the run Succeeded with a friendly message
+          and no notifications are sent.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-badge">5</div>
+        <div class="step-content">
+          <h4>Apply to Each — Build HTML Cards</h4>
+          <p>For every RSS item, a <em>Compose</em> action renders a self-contained styled
+          <code>&lt;div&gt;</code> card containing the post title (linked), publish date,
+          summary text, and a "Read More" button. Each card is appended to the
+          <code>HTML_Body</code> variable.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-badge">6</div>
+        <div class="step-content">
+          <h4>Compose Email Header &amp; Footer</h4>
+          <p>After the loop, two Compose actions generate a branded gradient header banner
+          (with today's date) and a footer with a link to the full blog archive.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-badge">7</div>
+        <div class="step-content">
+          <h4>Compose Full Email Body &amp; Final Card</h4>
+          <p>A single expression merges the three pieces:
+          <code>Header + HTML_Body variable + Footer</code> into the final email body string.
+          A separate Compose assembles the Teams Adaptive Card payload from the same post data.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-badge">8</div>
+        <div class="step-content">
+          <h4>Send Notification Email (Office 365 Outlook)</h4>
+          <p>The HTML digest is dispatched via the Office 365 Outlook connector to the
+          <code>NotificationEmail</code> environment variable recipient. The subject line includes
+          today's date so each email is easily identifiable in the inbox.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-badge teams">T</div>
+        <div class="step-content">
+          <h4>Post Card in a Chat or Channel (Microsoft Teams)</h4>
+          <p>Immediately after the email, the flow posts the digest as an
+          <strong>Adaptive Card</strong> to a configured Microsoft Teams chat or channel via the
+          Teams connector — giving the whole team instant visibility without anyone needing to
+          check their inbox.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-badge error">!</div>
+        <div class="step-content">
+          <h4>Error Handler Scope (runs only on failure)</h4>
+          <p>If <em>Main Scope</em> fails or times out, a second scope builds an HTML error
+          report — capturing the error code and message from the failed scope — and sends it
+          to a separate <code>AlertEmail</code> environment variable (typically an admin mailbox).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screenshot 2 — Full flow designer -->
+    <figure class="screenshot">
+      <img src="Screenshots/Power%20Automate%20designer%20view%20showing%20the%20full%20flow%20%E2%80%94%20trigger,%20Main%20Scope,%20and%20Error%20Handler%20Scope.png"
+           alt="Power Automate designer showing the complete flow" />
+      <figcaption>Power Automate designer view — the complete flow from Recurrence trigger through Main Scope (including the "Post card in a chat or channel" Teams step) to the Error Handler Scope</figcaption>
+    </figure>
+
+    <!-- ─── Design decisions ─── -->
+    <h2>Key Design Decisions</h2>
+
+    <h3>Why Two Scopes?</h3>
+    <p>
+      Wrapping the main logic in a <strong>Scope</strong> action is the cleanest way to implement
+      try/catch semantics in Power Automate. The Error Handler Scope is configured with
+      <code>runAfter: { Main_Scope: ["Failed", "TimedOut"] }</code>, which means it is completely
+      invisible during a healthy run and only activates when something goes wrong.
+      This pattern keeps the happy-path logic clean and the error-path logic isolated.
+    </p>
+
+    <h3>Graceful Exit When No Posts Are Found</h3>
+    <p>
+      Rather than sending empty notifications on quiet days, the flow uses a <strong>Terminate</strong>
+      action inside the <em>else</em> branch with <code>runStatus: "Succeeded"</code>. This keeps
+      your run history green (not red) for no-news days, which matters when you are monitoring
+      many flows.
+    </p>
+
+    <h3>Dual-Channel Delivery: Email and Teams</h3>
+    <p>
+      The flow delivers the same digest content through two channels in a single run. The Office 365
+      Outlook action sends a rich, self-contained HTML email for in-depth reading, while the Teams
+      connector posts an Adaptive Card to a shared channel — giving the whole team at-a-glance
+      visibility without anyone needing to check their inbox. Both notifications fire from the same
+      flow run, so there is zero duplication of effort.
+    </p>
+
+    <h3>HTML Email Built Entirely in Flow Expressions</h3>
+    <p>
+      Every piece of HTML — from the gradient header to the individual post cards — is generated
+      using Power Automate <strong>Compose</strong> actions and inline expressions. There is no
+      external template engine, no Azure Function, no storage account. The entire rendering pipeline
+      lives inside the flow definition.
+    </p>
+
+    <h3>Environment Variables Instead of Hard-Coded Values</h3>
+    <p>
+      The <code>NotificationEmail</code> and <code>AlertEmail</code> values are defined as
+      <strong>environment variables</strong> within the Power Platform solution — not hard-coded
+      inside actions. This means anyone who imports the solution can set the email addresses
+      directly in the solution's Environment Variables section without touching the flow internals,
+      making it truly plug-and-play across environments.
+    </p>
+
+    <!-- Screenshots 3a–3b — Env vars + flow action detail -->
+    <div class="screenshot-series">
+      <p class="series-title">Environment variables and their use inside the flow</p>
+      <figure class="screenshot">
+        <img src="Screenshots/Flow%20parameters%20pane%20showing%20NotificationEmail%20and%20AlertEmail%20configuration%20fields%20-%20chunk1.png"
+             alt="Power Platform Solutions Environment Variables — AlertEmail and NotificationEmail" />
+        <figcaption>The solution's Environment Variables section — AlertEmail and NotificationEmail are configured here once, keeping the flow portable across environments without any internal edits</figcaption>
+      </figure>
+      <figure class="screenshot">
+        <img src="Screenshots/Flow%20parameters%20pane%20showing%20NotificationEmail%20and%20AlertEmail%20configuration%20fields%20-%20chunk2.png"
+             alt="Flow designer showing Send Notification Email using the NotificationEmail environment variable, with Error Handler Scope below" />
+        <figcaption>Inside the flow — the Send Notification Email action resolves the NotificationEmail environment variable at runtime; the Error Handler Scope below uses the same pattern for AlertEmail</figcaption>
+      </figure>
+    </div>
+
+    <!-- ─── The notification output ─── -->
+    <h2>What the Notifications Look Like</h2>
+
+    <h3>Email Digest in Outlook</h3>
+    <p>
+      The generated email is fully self-contained HTML — no external CSS, no linked stylesheets —
+      so it renders reliably across email clients. Key design choices:
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Element</th>
+          <th>Design Choice</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Header</strong></td>
+          <td>Microsoft blue gradient banner with today's date — instantly recognisable</td>
+        </tr>
+        <tr>
+          <td><strong>Post Cards</strong></td>
+          <td>White card with blue left border accent, title in brand blue, publish date, summary, and a "Read More" CTA button</td>
+        </tr>
+        <tr>
+          <td><strong>Footer</strong></td>
+          <td>Subtle grey separator with a direct link to the full blog archive</td>
+        </tr>
+        <tr>
+          <td><strong>Font</strong></td>
+          <td>Segoe UI — consistent with Microsoft product design</td>
+        </tr>
+        <tr>
+          <td><strong>Max width</strong></td>
+          <td>720 px — optimal for desktop email clients; readable on mobile</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Screenshot 4 — Email post card close-up -->
+    <figure class="screenshot">
+      <img src="Screenshots/Close-up%20of%20a%20single%20post%20card%20in%20the%20digest%20email%20showing%20title,%20date,%20summary,%20and%20Read%20More%20button.png"
+           alt="Close-up of a single post card in the digest email" />
+      <figcaption>A single email post card — article title linked to the full post, calendar-icon publish date, rich summary text, and a prominent "Read More" button</figcaption>
+    </figure>
+
+    <h3>Microsoft Teams Channel Card</h3>
+    <p>
+      In parallel with the email, the flow posts an <strong>Adaptive Card</strong> from the
+      EPMPoint Workflows bot to the configured Teams chat or channel. The card presents each new
+      post with its title, publish date, summary, and a "Read More" button — giving the team
+      instant awareness of the day's Power Platform news directly in their Teams feed, without
+      switching to email.
+    </p>
+
+    <!-- Screenshots — Teams notifications -->
+    <div class="screenshot-series">
+      <p class="series-title">Microsoft Teams channel notification</p>
+      <figure class="screenshot">
+        <img src="Screenshots/Close-up%20of%20a%20single%20post%20card%20in%20the%20digest%20email%20showing%20title,%20date,%20summary,%20and%20Read%20More%20button%20-%20optional%20teams%20card%20closeup%20view.png"
+             alt="Close-up of the EPMPoint Intelligence Digest Teams Adaptive Card" />
+        <figcaption>Close-up of the Teams Adaptive Card — the "EPMPoint Intelligence Digest" card lists each new post with title, publish date, summary, and a Read More button, mirroring the email digest inside Teams</figcaption>
+      </figure>
+      <figure class="screenshot">
+        <img src="Screenshots/Sample%20digest%20email%20as%20it%20appears%20in%20Outlook%20%E2%80%94%20showing%20the%20branded%20header,%20post%20cards,%20and%20footer%20-%20Teams%20Notifications%20(extra%20boinus%20screenshot).png"
+             alt="Microsoft Teams showing the full digest notification in the Workflows chat" />
+        <figcaption>Full Teams view — the EPMPoint Intelligence Digest card appears in the Workflows chat showing all four new blog posts, with EPMPoint branding and "View Full Blog Archive" button at the bottom</figcaption>
+      </figure>
+    </div>
+
+    <!-- Screenshot 5 — Error alert email -->
+    <figure class="screenshot">
+      <img src="Screenshots/Error%20alert%20email%20generated%20by%20the%20Error%20Handler%20Scope%20%E2%80%94%20showing%20error%20code,%20message,%20and%20timestamp.png"
+           alt="Error alert email from the Error Handler Scope" />
+      <figcaption>Error alert email from the Error Handler Scope — sent as high importance, showing flow name, UTC timestamp, error code, and error message; prompts the admin to review run history in the Power Automate portal</figcaption>
+    </figure>
+
+    <!-- ─── Prerequisites & import ─── -->
+    <h2>Prerequisites &amp; How to Import</h2>
+
+    <div class="callout note">
+      <div class="callout-title">📋 What You Need</div>
+      <ul style="margin: 0; padding-left: 20px;">
+        <li>A <strong>Power Platform environment</strong> with a Dataverse database</li>
+        <li>An <strong>Office 365 Outlook</strong> licence (for the email connection)</li>
+        <li>A <strong>Microsoft Teams</strong> licence (for the channel card notification)</li>
+        <li>Maker permissions in the target environment</li>
+      </ul>
+    </div>
+
+    <ol>
+      <li>Download the solution ZIP — <code>PowerPlatformBlogDigest_1_0_0_3.zip</code></li>
+      <li>Navigate to <strong>make.powerautomate.com</strong> → your environment → Solutions</li>
+      <li>Click <strong>Import solution</strong> and upload the ZIP</li>
+      <li>During import, create or select connections for <strong>RSS</strong>, <strong>Office 365 Outlook</strong>, and <strong>Microsoft Teams</strong></li>
+      <li>After import, open the solution and set values for the <strong>NotificationEmail</strong> and <strong>AlertEmail</strong> environment variables</li>
+      <li>Open the flow and configure the <strong>Post card in a chat or channel</strong> action with your target Teams team and channel</li>
+      <li>Save and <strong>Turn on</strong> the flow</li>
+    </ol>
+
+    <!-- Screenshots 6a–6b — Solutions view -->
+    <div class="screenshot-series">
+      <p class="series-title">Power Platform solution contents after import</p>
+      <figure class="screenshot">
+        <img src="Screenshots/Power%20Platform%20Solutions%20%E2%80%94%20Flow%20%26%20connection%20references%20for%20RSS%20and%20Office%20365%20Outlook%20connectors.png"
+             alt="Power Platform Solutions — All solution objects including Cloud Flow and three Connection References" />
+        <figcaption>The imported solution contains 4 objects — one Cloud Flow ("Power Platform Blog Digest") and three Connection References for Microsoft Teams, Office 365 Outlook, and RSS</figcaption>
+      </figure>
+      <figure class="screenshot">
+        <img src="Screenshots/Power%20Platform%20Solutions%20%E2%80%94%20connection%20references%20for%20RSS%20and%20Office%20365%20Outlook%20connectors.png"
+             alt="Connection References — Microsoft Teams, Office 365 Outlook, and RSS connectors" />
+        <figcaption>Connection References detail — all three connectors (Microsoft Teams, Office 365 Outlook, RSS) must be linked to active connections before the flow will run</figcaption>
+      </figure>
+    </div>
+
+    <!-- ─── What's next ─── -->
+    <h2>Ideas for Extending This Flow</h2>
+    <p>
+      The current flow delivers a daily dual-channel digest with full error handling and does it
+      well. But there are several natural extensions worth considering:
+    </p>
+    <ul>
+      <li><strong>Multiple RSS feeds</strong> — add the Power Apps, Power BI, and Copilot Studio blogs to the same digest by parallelising additional RSS actions</li>
+      <li><strong>Weekly digest mode</strong> — change the recurrence to run on Mondays with a <code>-7</code> day offset to capture the full previous week in one card</li>
+      <li><strong>Audience filtering</strong> — the blog supports audience query parameters; filter specifically for IT Pro or Developer posts</li>
+      <li><strong>Dataverse logging</strong> — write each digest run to a Dataverse table for audit and trend analysis</li>
+      <li><strong>Keyword alerts</strong> — add a condition inside the loop to flag posts that match keywords like "Copilot", "deprecation", or "breaking change"</li>
+    </ul>
+
+    <div class="callout tip">
+      <div class="callout-title">✅ Pro Tip</div>
+      If you want the digest to cover the weekend, consider changing the recurrence to run
+      on Mondays with a <code>-3</code> day offset instead of <code>-1</code>. That way
+      Friday, Saturday, and Sunday posts all appear in the Monday morning email and Teams card.
+    </div>
+
+    <!-- ─── Closing ─── -->
+    <h2>Wrapping Up</h2>
+    <p>
+      The Power Platform Blog Digest is a great example of what I love about Power Automate:
+      you can solve a real, everyday problem without writing a single line of server-side code,
+      without provisioning any infrastructure, and without any ongoing maintenance burden.
+      The entire solution — from trigger to dual-channel notification to error handling — lives inside
+      a single exported solution ZIP that you can import into any environment in minutes.
+    </p>
+    <p>
+      Whether your team prefers email or Teams (or both), this flow has you covered. You get a
+      rich HTML Outlook digest for in-depth reading <em>and</em> a quick Teams Adaptive Card for
+      at-a-glance awareness — all from the same single flow run, zero extra effort.
+    </p>
+    <p>
+      If you find this useful, feel free to extend it, remix it, and share it with your team.
+      And if you build something cool on top of it, I would love to hear about it.
+    </p>
+    <p>
+      The solution is packaged as a managed-ready Power Platform solution
+      (<code>PowerPlatformBlogDigest_1_0_0_3.zip</code>) and is ready to import into any
+      environment today.
+    </p>
+
+    <!-- ─── Author Bio ─── -->
+    <div class="author-bio">
+      <div class="avatar">RN</div>
+      <div>
+        <h3>Ranjith Neela</h3>
+        <div class="role">Power Platform Architect &nbsp;|&nbsp; EPMPoint &nbsp;|&nbsp;
+          <a href="mailto:ranjith.neela@epmpoint.com">ranjith.neela@epmpoint.com</a>
+        </div>
+        <p>
+          Ranjith is a Power Platform architect at EPMPoint, specialising in Power Automate,
+          Power Apps, and Dataverse solutions for enterprise clients. He is passionate about
+          building elegant, low-code automations that eliminate repetitive work and surface
+          the right information at the right time.
+        </p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ═══════════════ FOOTER ═══════════════ -->
+  <footer class="article-footer">
+    <p>
+      &copy; 2026 EPMPoint &nbsp;·&nbsp;
+      <a href="mailto:ranjith.neela@epmpoint.com">ranjith.neela@epmpoint.com</a>
+    </p>
+    <p style="margin-top: 6px; font-size: 12px; color: #a8d4f5;">
+      Published on the EPMPoint blog &nbsp;·&nbsp; Power Automate &nbsp;·&nbsp; Power Platform
+    </p>
+  </footer>
+
+</div><!-- /.container -->
+
+</body>
+</html>

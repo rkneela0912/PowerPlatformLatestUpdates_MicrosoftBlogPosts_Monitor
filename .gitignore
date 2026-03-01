@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Extracted solution (working copy, not needed in repo)
+extracted/
+
+# OS
+.DS_Store
+Thumbs.db
