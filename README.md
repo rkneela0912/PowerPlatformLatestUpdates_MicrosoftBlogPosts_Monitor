@@ -2,10 +2,13 @@
 
 > **A daily dual-channel digest of new Microsoft Power Platform blog posts — delivered automatically to your inbox *and* your Microsoft Teams channel every morning.**
 
+[![Live Article](https://img.shields.io/badge/Live%20Article-GitHub%20Pages-0078d4?logo=githubpages&logoColor=white)](https://rkneela0912.github.io/PowerPlatformLatestUpdates_MicrosoftBlogPosts_Monitor/)
 [![Power Automate](https://img.shields.io/badge/Power%20Automate-Cloud%20Flow-0078d4?logo=microsoftpowerautomate&logoColor=white)](https://make.powerautomate.com)
 [![Microsoft Teams](https://img.shields.io/badge/Microsoft%20Teams-Notification-6264a7?logo=microsoftteams&logoColor=white)](https://teams.microsoft.com)
 [![Power Platform](https://img.shields.io/badge/Power%20Platform-Solution-742774?logo=microsoftpowerapps&logoColor=white)](https://make.powerapps.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+### 🌐 [Read the full article on GitHub Pages →](https://rkneela0912.github.io/PowerPlatformLatestUpdates_MicrosoftBlogPosts_Monitor/)
 
 ---
 
@@ -33,8 +36,8 @@ PowerPlatformBlogDigest_1_0_0_3.zip          ← Importable Power Platform solut
 └── Workflows/
     └── PowerPlatformBlogDigest-*.json        ← Full cloud flow definition
 
-Screenshots/                                  ← Article screenshots (referenced by blog-post.html)
-blog-post.html                               ← Standalone HTML article with embedded screenshots
+Screenshots/                                  ← Article screenshots (referenced by index.html)
+index.html                                   ← Blog article (GitHub Pages entry point) with embedded screenshots
 blog-post.docx                               ← Word document version with embedded screenshots
 generate_docx.py                             ← Python script that generated blog-post.docx
 ```
